@@ -69,7 +69,7 @@ var UIController = (function() {
       return {
         type: document.querySelector(DOMstrings.inputType).value, // Will be either inc or exp
         description: document.querySelector(DOMstrings.inputDescription).value,
-        value: document.querySelector(DOMstrings.inputValue).value
+        value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
       };
     },
 
@@ -94,17 +94,19 @@ var UIController = (function() {
       //Insert HTLM into the DOM
       document.querySelector(element).insertAdjacentHTML("beforeend", newHTML);
     },
-     //clears input fields for next input
-    clearFields: function(){
+    //clears input fields for next input
+    clearFields: function() {
       var fields, fieldsArray;
       //creates list of values
-      fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+      fields = document.querySelectorAll(
+        DOMstrings.inputDescription + ", " + DOMstrings.inputValue
+      );
       //converts list of values to array so we can use forEach
       fieldsArray = Array.prototype.slice.call(fields);
       //Loops over our array setting all values to empty
-      fieldsArray.forEach(function (current, index, array) {
-        current.value = '';
-      })
+      fieldsArray.forEach(function(current, index, array) {
+        current.value = "";
+      });
       //set cursor back to description box
       fieldsArray[0].focus();
     },
@@ -132,22 +134,28 @@ var controller = (function(budgetCtrl, UICtrl) {
       }
     });
   };
+  var updateBudget = function() {
+    //1. Calculate the budget
+    //2. Return the budget
+    //3. Display the budget on the UI
+  };
 
   //This function adds a new item from input
   var ctrlAddItem = function() {
     var input, newItem;
     //1. Get the filed input data
     input = UICtrl.getInput();
+    if (input.description !== "" && !isNaN(input.value) && input.value > 0) {
+      //2. Add the item to the budget controller
+      newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+      //3. Add the item to the UI
+      UICtrl.addListItem(newItem, input.type);
+      //4. Clear the fields
+      UICtrl.clearFields();
 
-    //2. Add the item to the budget controller
-    newItem = budgetCtrl.addItem(input.type, input.description, input.value);
-    //3. Add the item to the UI
-    UICtrl.addListItem(newItem, input.type);
-    //4. Clear the fields
-    UICtrl.clearFields();
-
-    //5. Calculate the budget
-    //6. Display the budget on the UI
+      //5. Calculate and update the budget
+      updateBudget();
+    }
   };
 
   return {
