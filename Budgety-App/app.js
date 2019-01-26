@@ -1,21 +1,21 @@
 //BUDGET CONTROLLER
-var budgetController = (function() {
+var budgetController = (function () {
   //constructor functions that creat objects which set our inputs
-  var Expense = function(id, description, value) {
+  var Expense = function (id, description, value) {
     this.id = id;
     this.description = description;
     this.value = value;
   };
 
-  var Income = function(id, description, value) {
+  var Income = function (id, description, value) {
     this.id = id;
     this.description = description;
     this.value = value;
   };
 
-  var calculateTotal = function(type) {
+  var calculateTotal = function (type) {
     var sum = 0;
-    data.allItems[type].forEach(function(cur) {
+    data.allItems[type].forEach(function (cur) {
       sum += cur.value;
     });
     data.totals[type] = sum;
@@ -36,7 +36,7 @@ var budgetController = (function() {
   };
 
   return {
-    addItem: function(type, des, val) {
+    addItem: function (type, des, val) {
       var newItem;
       //Create new ID
       if (data.allItems[type].length > 0) {
@@ -57,7 +57,24 @@ var budgetController = (function() {
       // Return the new element
       return newItem;
     },
-    calculateBudget: function() {
+
+    deleteItem: function (type, id) {
+      var ids, index;
+
+      //create array of IDs and find index of ID we want to delete
+      ids = data.allItems[type].map(function (current) {
+        return current.id;
+      });
+
+      index = ids.indexOf(id);
+
+      if (index !== -1) {
+        data.allItems[type].splice(index, 1);
+      }
+
+    },
+
+    calculateBudget: function () {
       // calculate total income and expenses
       calculateTotal("exp");
       calculateTotal("inc");
@@ -73,7 +90,7 @@ var budgetController = (function() {
       }
     },
 
-    getBudget: function() {
+    getBudget: function () {
       return {
         budget: data.budget,
         totalInc: data.totals.inc,
@@ -82,14 +99,14 @@ var budgetController = (function() {
       };
     },
 
-    testing: function() {
+    testing: function () {
       console.log(data);
     }
   };
 })();
 
 //UI CONTROLLER
-var UIController = (function() {
+var UIController = (function () {
   var DOMstrings = {
     inputType: ".add__type",
     inputDescription: ".add__description",
@@ -105,7 +122,7 @@ var UIController = (function() {
   };
 
   return {
-    getInput: function() {
+    getInput: function () {
       return {
         type: document.querySelector(DOMstrings.inputType).value, // Will be either inc or exp
         description: document.querySelector(DOMstrings.inputDescription).value,
@@ -113,7 +130,7 @@ var UIController = (function() {
       };
     },
 
-    addListItem: function(obj, type) {
+    addListItem: function (obj, type) {
       var html, newHTMl, element;
       // Create HTLM string with placeholder
       if (type === "inc") {
@@ -135,7 +152,7 @@ var UIController = (function() {
       document.querySelector(element).insertAdjacentHTML("beforeend", newHTML);
     },
     //clears input fields for next input
-    clearFields: function() {
+    clearFields: function () {
       var fields, fieldsArray;
       //creates list of values
       fields = document.querySelectorAll(
@@ -144,14 +161,14 @@ var UIController = (function() {
       //converts list of values to array so we can use forEach
       fieldsArray = Array.prototype.slice.call(fields);
       //Loops over our array setting all values to empty
-      fieldsArray.forEach(function(current, index, array) {
+      fieldsArray.forEach(function (current, index, array) {
         current.value = "";
       });
       //set cursor back to description box
       fieldsArray[0].focus();
     },
 
-    displayBudget: function(obj) {
+    displayBudget: function (obj) {
       document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
       document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
       document.querySelector(DOMstrings.expensesLabel).textContent =
@@ -167,23 +184,23 @@ var UIController = (function() {
     },
 
     //make DOMstrings object accessible outside UIController scope.
-    getDOMstrings: function() {
+    getDOMstrings: function () {
       return DOMstrings;
     }
   };
 })();
 
 //GLOBAL APP CONTROLLER
-var controller = (function(budgetCtrl, UICtrl) {
+var controller = (function (budgetCtrl, UICtrl) {
   //sets up all our event listeners for organization
-  var setupEventListeners = function() {
+  var setupEventListeners = function () {
     var DOM = UICtrl.getDOMstrings();
 
     document
       .querySelector(DOM.inputButton)
       .addEventListener("click", ctrlAddItem);
 
-    document.addEventListener("keypress", function(e) {
+    document.addEventListener("keypress", function (e) {
       if (e.keyCode === 13 || e.which === 13) {
         //.which is added for older browsers
         ctrlAddItem();
@@ -194,7 +211,7 @@ var controller = (function(budgetCtrl, UICtrl) {
       .querySelector(DOM.container)
       .addEventListener("click", ctrlDeleteItem);
   };
-  var updateBudget = function() {
+  var updateBudget = function () {
     //1. Calculate the budget
     budgetCtrl.calculateBudget();
     //2. Return the budget
@@ -204,7 +221,7 @@ var controller = (function(budgetCtrl, UICtrl) {
   };
 
   //This function adds a new item from input
-  var ctrlAddItem = function() {
+  var ctrlAddItem = function () {
     var input, newItem;
     //1. Get the filed input data
     input = UICtrl.getInput();
@@ -221,22 +238,23 @@ var controller = (function(budgetCtrl, UICtrl) {
     }
   };
 
-  var ctrlDeleteItem = function(e) {
+  var ctrlDeleteItem = function (e) {
     var itemID, splitID, type, ID;
 
     itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
     if (itemID) {
       splitID = itemID.split("-");
       type = splitID[0];
-      ID = splitID[1];
+      ID = parseInt(splitID[1]);
       //1. Delete the item from the data structure
+      budgetCtrl.deleteItem(type, ID);
       //2. Delete the item from the UI
       //3. Update and show the new budget
     }
   };
 
   return {
-    init: function() {
+    init: function () {
       console.log("Application has started");
       UICtrl.displayBudget({
         budget: 0,
