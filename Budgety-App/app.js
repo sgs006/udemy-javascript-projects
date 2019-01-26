@@ -140,7 +140,7 @@ var UIController = (function () {
       } else if (type === "exp") {
         element = DOMstrings.expensesContainer;
         html =
-          '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><iclass="ion-ios-close-outline"></i></button></div></div></div>';
+          '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
       }
 
       // Replace placeholder with actual data
@@ -151,6 +151,13 @@ var UIController = (function () {
       //Insert HTLM into the DOM
       document.querySelector(element).insertAdjacentHTML("beforeend", newHTML);
     },
+
+    deleteListItem: function (selectorID) {
+      var el = document.getElementById(selectorID);
+      el.parentNode.removeChild(el);
+
+    },
+
     //clears input fields for next input
     clearFields: function () {
       var fields, fieldsArray;
@@ -249,7 +256,9 @@ var controller = (function (budgetCtrl, UICtrl) {
       //1. Delete the item from the data structure
       budgetCtrl.deleteItem(type, ID);
       //2. Delete the item from the UI
+      UICtrl.deleteListItem(itemID);
       //3. Update and show the new budget
+      updateBudget();
     }
   };
 
